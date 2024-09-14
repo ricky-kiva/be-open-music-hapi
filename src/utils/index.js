@@ -20,4 +20,4 @@ const mapDBSongToModel = ({
   albumId: album_id
 });
 
-module.exports = mapDBSongToModel;
+module.exports = { mapDBSongToModel };
