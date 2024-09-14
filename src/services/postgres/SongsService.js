@@ -37,7 +37,7 @@ class SongsService {
 
   async getAll() {
     const result = await this._pool
-      .query('SELECT * FROM songs');
+      .query('SELECT id, title, performer FROM songs');
 
     return result.rows
       .map(mapDBSongToModel);
