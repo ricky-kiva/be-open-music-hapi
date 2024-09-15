@@ -2,6 +2,7 @@
 
 const { nanoid } = require('nanoid');
 const { Pool } = require('pg');
+const { mapDBSongToModel } = require('../../utils');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 
@@ -58,7 +59,8 @@ class SongsService {
 
     const result = await this._pool.query(q);
 
-    return result.rows;
+    return result.rows
+      .map(mapDBSongToModel);
   }
 
   async getById(id) {
@@ -73,7 +75,8 @@ class SongsService {
       throw new NotFoundError('Song not found');
     }
 
-    return result.rows[0];
+    return result.rows
+      .map(mapDBSongToModel)[0];
   }
 
   async editById(
@@ -90,7 +93,7 @@ class SongsService {
     const q = {
       text: `
         UPDATE songs SET 
-        title = $2, year = $3, genre = $4, performer = $5, duration = $6, "albumId" = $7 
+        title = $2, year = $3, genre = $4, performer = $5, duration = $6, album_id = $7 
         WHERE id = $1 RETURNING id
       `,
       values: [id, title, year, genre, performer, duration, albumId]
