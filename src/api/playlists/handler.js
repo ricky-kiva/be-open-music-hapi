@@ -38,6 +38,19 @@ class PlaylistsHandler {
       data: { playlists }
     };
   }
+
+  async deletePlaylistById(req) {
+    const { id } = req.params;
+    const { id: credentialId } = req.auth.credentials;
+
+    await this._service.verifyOwner(id, credentialId);
+    await this._service.deleteById(id);
+
+    return {
+      status: 'success',
+      message: 'Playlist successfully deleted'
+    };
+  }
 }
 
 module.exports = PlaylistsHandler;
