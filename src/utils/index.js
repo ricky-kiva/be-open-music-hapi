@@ -20,4 +20,13 @@ const mapDBSongToModel = ({
   albumId: album_id
 });
 
-module.exports = { mapDBSongToModel };
+const mapDBPlaylistToModel = ({ id, name, owner }) => ({
+  id,
+  name,
+  username: owner
+});
+
+module.exports = {
+  mapDBSongToModel,
+  mapDBPlaylistToModel
+};

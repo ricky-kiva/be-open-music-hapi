@@ -3,8 +3,8 @@
 const autoBind = require('auto-bind');
 
 class PlaylistsHandler {
-  constructor(playlistsService, validator) {
-    this._playlistsService = playlistsService;
+  constructor(service, validator) {
+    this._service = service;
     this._validator = validator;
 
     autoBind(this);
@@ -16,7 +16,7 @@ class PlaylistsHandler {
     const { id: credentialId } = req.auth.credentials;
     const { name } = req.payload;
 
-    const playlistId = await this._playlistsService.add({ name, owner: credentialId });
+    const playlistId = await this._service.add({ name, owner: credentialId });
 
     const res = h.response({
       status: 'success',
@@ -26,6 +26,17 @@ class PlaylistsHandler {
     res.code(201);
 
     return res;
+  }
+
+  async getPlaylists(req) {
+    const { id: credentialId } = req.auth.credentials;
+
+    const playlists = await this._service.getAll(credentialId);
+
+    return {
+      status: 'success',
+      data: { playlists }
+    };
   }
 }
 
