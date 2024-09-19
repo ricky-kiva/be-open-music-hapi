@@ -5,6 +5,7 @@ const { nanoid } = require('nanoid');
 const { mapDBPlaylistToModel } = require('../../utils');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
+const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class PlaylistsService {
   constructor() {
@@ -50,6 +51,25 @@ class PlaylistsService {
 
     if (!result.rows.length) {
       throw new NotFoundError('Playlist not found');
+    }
+  }
+
+  async verifyOwner(id, owner) {
+    const q = {
+      text: 'SELECT * FROM playlists WHERE id = $1',
+      values: [id]
+    };
+
+    const result = await this._pool.query(q);
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Playlist not found');
+    }
+
+    const playlist = result.rows[0];
+
+    if (playlist.owner !== owner) {
+      throw new AuthorizationError("You don't have the right to access this resource");
     }
   }
 }
