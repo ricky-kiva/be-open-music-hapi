@@ -3,6 +3,7 @@
 require('dotenv').config();
 
 const Hapi = require('@hapi/hapi');
+const Jwt = require('@hapi/jwt');
 const albums = require('./api/albums');
 const AlbumsService = require('./services/postgres/AlbumsService');
 const AlbumsValidator = require('./validator/albums');
@@ -12,12 +13,17 @@ const SongsValidator = require('./validator/songs');
 const users = require('./api/users');
 const UsersService = require('./services/postgres/UsersService');
 const UsersValidator = require('./validator/users');
+const auths = require('./api/authentications');
+const AuthsService = require('./services/postgres/AuthsService');
+const AuthsValidator = require('./validator/auths');
+const TokenManager = require('./tokenize/TokenManager');
 const ClientError = require('./exceptions/ClientError');
 
 const init = async () => {
   const albumsService = new AlbumsService();
   const songsService = new SongsService();
   const usersService = new UsersService();
+  const authsService = new AuthsService();
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -26,6 +32,9 @@ const init = async () => {
       cors: {
         origin: ['*']
       }
+    },
+    debug: {
+      request: ['error']
     }
   });
 
@@ -61,6 +70,24 @@ const init = async () => {
     return h.continue;
   });
 
+  await server.register({ plugin: Jwt });
+
+  server.auth.strategy('open_music_jwt', 'jwt', {
+    keys: process.env.ACCESS_TOKEN_KEY,
+    verify: {
+      aud: false,
+      iss: false,
+      sub: false,
+      maxAgeSec: process.env.ACCESS_TOKEN_AGE
+    },
+    validate: (artifacts) => ({
+      isValid: true,
+      credentials: {
+        id: artifacts.decoded.payload.id
+      }
+    })
+  });
+
   await server.register([
     {
       plugin: albums,
@@ -79,6 +106,14 @@ const init = async () => {
       options: {
         service: usersService,
         validator: UsersValidator
+      }
+    }, {
+      plugin: auths,
+      options: {
+        authsService,
+        usersService,
+        tokenManager: TokenManager,
+        validator: AuthsValidator
       }
     }
   ]);
