@@ -41,6 +41,18 @@ class PlaylistsService {
       .map(mapDBPlaylistToModel);
   }
 
+  async getById(id) {
+    const q = {
+      text: 'SELECT * FROM playlists WHERE id = $1',
+      values: [id]
+    };
+
+    const result = await this._pool.query(q);
+
+    return result.rows
+      .map(mapDBPlaylistToModel)[0];
+  }
+
   async deleteById(id) {
     const q = {
       text: 'DELETE FROM playlists WHERE id = $1 RETURNING id',
