@@ -53,6 +53,26 @@ class PlaylistsHandler {
     };
   }
 
+  async getPlaylistById(req) {
+    const { id: playlistId } = req.params;
+    const { id: credentialId } = req.auth.credentials;
+
+    await this._playlistsService.verifyOwner(playlistId, credentialId);
+
+    const playlist = await this._playlistsService.getById(playlistId);
+    const songs = await this._playlistSongsService.getAll(playlistId);
+
+    return {
+      status: 'success',
+      data: {
+        playlist: {
+          ...playlist,
+          songs
+        }
+      }
+    };
+  }
+
   async postPlaylistSongBySongId(req, h) {
     this._validator.validatePostSongPayload(req.payload);
 

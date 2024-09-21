@@ -24,6 +24,11 @@ const routes = (h) => [
     handler: h.postPlaylistSongBySongId,
     options: { auth: 'open_music_jwt' }
   }, {
+    method: 'GET',
+    path: `${playlistsPath}/{id}/songs`,
+    handler: h.getPlaylistById,
+    options: { auth: 'open_music_jwt' }
+  }, {
     method: 'DELETE',
     path: `${playlistsPath}/{id}/songs`,
     handler: h.deletePlaylistSongBySongId,
