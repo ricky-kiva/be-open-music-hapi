@@ -38,9 +38,6 @@ const init = async () => {
       cors: {
         origin: ['*']
       }
-    },
-    debug: {
-      request: ['error']
     }
   });
 
