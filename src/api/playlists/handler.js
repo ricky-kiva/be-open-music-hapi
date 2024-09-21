@@ -54,7 +54,7 @@ class PlaylistsHandler {
   }
 
   async postPlaylistSongBySongId(req, h) {
-    this._validator.validateDeleteSongPayload(req.payload);
+    this._validator.validatePostSongPayload(req.payload);
 
     const { id: playlistId } = req.params;
     const { id: credentialId } = req.auth.credentials;
@@ -73,6 +73,24 @@ class PlaylistsHandler {
     res.code(201);
 
     return res;
+  }
+
+  async deletePlaylistSongBySongId(req) {
+    this._validator.validateDeleteSongPayload(req.payload);
+
+    const { id: playlistId } = req.params;
+    const { id: credentialId } = req.auth.credentials;
+
+    await this._playlistsService.verifyOwner(playlistId, credentialId);
+
+    const { songId } = req.payload;
+
+    await this._playlistSongsService.delete({ playlistId, songId });
+
+    return {
+      status: 'success',
+      message: 'Song successfully deleted from playlist'
+    };
   }
 }
 

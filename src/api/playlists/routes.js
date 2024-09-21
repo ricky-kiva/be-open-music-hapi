@@ -23,6 +23,11 @@ const routes = (h) => [
     path: `${playlistsPath}/{id}/songs`,
     handler: h.postPlaylistSongBySongId,
     options: { auth: 'open_music_jwt' }
+  }, {
+    method: 'DELETE',
+    path: `${playlistsPath}/{id}/songs`,
+    handler: h.deletePlaylistSongBySongId,
+    options: { auth: 'open_music_jwt' }
   }
 ];
 
