@@ -26,6 +26,25 @@ class PlaylistSongsService {
       throw new InvariantError('Failed to add song to playlist');
     }
   }
+
+  async delete({ playlistId, songId }) {
+    await this._songsService.getById(songId);
+
+    const q = {
+      text: `
+        DELETE FROM playlist_songs
+        WHERE playlist_id = $1 AND song_id = $2
+        RETURNING id
+      `,
+      values: [playlistId, songId]
+    };
+
+    const result = await this._pool.query(q);
+
+    if (!result.rows.length) {
+      throw new InvariantError('Failed to delete song from playlist');
+    }
+  }
 }
 
 module.exports = PlaylistSongsService;
