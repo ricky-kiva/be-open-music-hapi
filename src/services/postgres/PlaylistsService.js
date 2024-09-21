@@ -1,15 +1,19 @@
 'use strict';
 
+const {
+  mapDBPlaylistToModel,
+  mapOwnerIdToUsername
+} = require('../../utils');
 const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
-const { mapDBPlaylistToModel } = require('../../utils');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class PlaylistsService {
-  constructor() {
+  constructor(usersService) {
     this._pool = new Pool();
+    this._usersService = usersService;
   }
 
   async add({ name, owner }) {
@@ -29,27 +33,33 @@ class PlaylistsService {
     return result.rows[0].id;
   }
 
-  async getAll(owner) {
+  async getAll(ownerId) {
     const q = {
       text: 'SELECT * FROM playlists WHERE owner = $1',
-      values: [owner]
+      values: [ownerId]
     };
+
+    const username = await this._usersService.getUsernameById(ownerId);
 
     const result = await this._pool.query(q);
 
     return result.rows
+      .map(mapOwnerIdToUsername({ ownerId, username }))
       .map(mapDBPlaylistToModel);
   }
 
-  async getById(id) {
+  async getById(playlistId, ownerId) {
     const q = {
       text: 'SELECT * FROM playlists WHERE id = $1',
-      values: [id]
+      values: [playlistId]
     };
+
+    const username = await this._usersService.getUsernameById(ownerId);
 
     const result = await this._pool.query(q);
 
     return result.rows
+      .map(mapOwnerIdToUsername({ ownerId, username }))
       .map(mapDBPlaylistToModel)[0];
   }
 
