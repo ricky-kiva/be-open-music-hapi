@@ -26,7 +26,17 @@ const mapDBPlaylistToModel = ({ id, name, owner }) => ({
   username: owner
 });
 
+const mapOwnerIdToUsername = ({ ownerId, username }) => {
+  return (o) => ({
+    ...o,
+    owner: o.owner === ownerId
+      ? username
+      : o.owner
+  });
+};
+
 module.exports = {
   mapDBSongToModel,
-  mapDBPlaylistToModel
+  mapDBPlaylistToModel,
+  mapOwnerIdToUsername
 };
