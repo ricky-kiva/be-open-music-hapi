@@ -54,6 +54,12 @@ exports.up = (pgm) => {
       type: 'VARCHAR(36)'
     }
   });
+
+  pgm.addConstraint(
+    'songs',
+    'fk_songs.album_id_albums.id',
+    'FOREIGN KEY(album_id) REFERENCES albums(id) ON DELETE CASCADE'
+  );
 };
 
 /**
@@ -62,6 +68,7 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
+  pgm.dropConstraint('songs', 'fk_songs.album_id_albums.id');
   pgm.dropTable('songs');
   pgm.dropTable('albums');
 };
