@@ -6,8 +6,9 @@ const InvariantError = require('../../exceptions/InvariantError');
 const ClientError = require('../../exceptions/ClientError');
 
 class AlbumLikesService {
-  constructor() {
+  constructor(cacheService) {
     this._pool = new Pool();
+    this._cacheService = cacheService;
   }
 
   async like(userId, albumId) {
@@ -25,6 +26,8 @@ class AlbumLikesService {
     if (!result.rows.length) {
       throw new InvariantError('Failed to like');
     }
+
+    await this._cacheService.delete(`album-likes:${albumId}`);
   }
 
   async dislike(userId, albumId) {
@@ -34,17 +37,38 @@ class AlbumLikesService {
     };
 
     await this._pool.query(q);
+    await this._cacheService.delete(`album-likes:${albumId}`);
   }
 
   async countLikes(albumId) {
-    const q = {
-      text: 'SELECT COUNT(*) FROM user_album_likes WHERE album_id = $1',
-      values: [albumId]
-    };
+    try {
+      const result = await this._cacheService.get(`album-likes:${albumId}`);
+      const intResult = parseInt(result, 10);
 
-    const result = await this._pool.query(q);
+      return {
+        fromCache: true,
+        likes: intResult
+      };
+    } catch (e) {
+      const q = {
+        text: 'SELECT COUNT(*) FROM user_album_likes WHERE album_id = $1',
+        values: [albumId]
+      };
 
-    return parseInt(result.rows[0].count, 10);
+      const result = await this._pool.query(q);
+      const intResult = parseInt(result.rows[0].count, 10);
+
+      await this._cacheService.set(
+        `album-likes:${albumId}`,
+        intResult,
+        1800
+      );
+
+      return {
+        fromCache: false,
+        likes: intResult
+      };
+    }
   }
 
   async checkLike(userId, albumId) {

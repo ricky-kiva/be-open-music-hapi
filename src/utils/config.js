@@ -12,6 +12,9 @@ const config = {
   },
   rabbitMQ: {
     server: process.env.RABBITMQ_SERVER
+  },
+  redis: {
+    server: process.env.REDIS_SERVER
   }
 };
 
