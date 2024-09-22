@@ -22,6 +22,9 @@ const playlists = require('./api/playlists');
 const PlaylistsService = require('./services/postgres/PlaylistsService');
 const PlaylistsValidator = require('./validator/playlists');
 const PlaylistSongsService = require('./services/postgres/PlaylistSongsService');
+const _exports = require('./api/exports');
+const ProducerService = require('./services/rabbitmq/ProducerService');
+const ExportsValidator = require('./validator/exports');
 const ClientError = require('./exceptions/ClientError');
 
 const init = async () => {
@@ -39,6 +42,9 @@ const init = async () => {
       cors: {
         origin: ['*']
       }
+    },
+    debug: {
+      request: ['error']
     }
   });
 
@@ -125,6 +131,13 @@ const init = async () => {
         playlistsService,
         playlistSongsService,
         validator: PlaylistsValidator
+      }
+    }, {
+      plugin: _exports,
+      options: {
+        producerService: ProducerService,
+        playlistsService,
+        validator: ExportsValidator
       }
     }
   ]);
