@@ -1,5 +1,7 @@
 'use strict';
 
+const path = require('path');
+
 const albumPath = '/albums';
 
 const routes = (h) => [
@@ -29,6 +31,14 @@ const routes = (h) => [
         multipart: true,
         output: 'stream',
         maxBytes: 512000
+      }
+    }
+  }, {
+    method: 'GET',
+    path: `${albumPath}/covers/{param*}`,
+    handler: {
+      directory: {
+        path: path.resolve(__dirname, 'files', 'covers')
       }
     }
   }
