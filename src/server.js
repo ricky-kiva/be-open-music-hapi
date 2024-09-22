@@ -29,6 +29,7 @@ const PlaylistSongsService = require('./services/postgres/PlaylistSongsService')
 const _exports = require('./api/exports');
 const ProducerService = require('./services/rabbitmq/ProducerService');
 const ExportsValidator = require('./validator/exports');
+const CacheService = require('./services/redis/CacheService');
 const ClientError = require('./exceptions/ClientError');
 
 const init = async () => {
@@ -36,7 +37,8 @@ const init = async () => {
 
   const albumsService = new AlbumsService();
   const storageService = new StorageService(coverUploadPath);
-  const albumLikesService = new AlbumLikesService();
+  const cacheService = new CacheService();
+  const albumLikesService = new AlbumLikesService(cacheService);
   const songsService = new SongsService();
   const usersService = new UsersService();
   const authsService = new AuthsService();
