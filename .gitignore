@@ -1,5 +1,6 @@
 node_modules
 postman
 creds
+src/api/albums/files/covers
 .env
 .prod.env
