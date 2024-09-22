@@ -30,7 +30,7 @@ const ExportsValidator = require('./validator/exports');
 const ClientError = require('./exceptions/ClientError');
 
 const init = async () => {
-  const coverUploadPath = path.resolve(__dirname, 'api/albums/cover');
+  const coverUploadPath = path.resolve(__dirname, 'api/albums/covers');
 
   const albumsService = new AlbumsService();
   const storageService = new StorageService(coverUploadPath);
