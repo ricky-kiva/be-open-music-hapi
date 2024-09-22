@@ -68,9 +68,11 @@ class AlbumsHandler {
 
     this._validator.validateCoverHeaders(cover.hapi.headers);
 
-    await this._storageService.writeFile(cover, cover.hapi);
+    const { id } = req.params;
 
-    // TODO save to DB
+    const filename = await this._storageService.writeFile(cover, cover.hapi);
+
+    await this._albumsService.addCover(id, filename);
 
     const res = h.response({
       status: 'success',
