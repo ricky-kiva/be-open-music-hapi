@@ -9,6 +9,9 @@ const config = {
     accessToken: process.env.ACCESS_TOKEN_KEY,
     refreshToken: process.env.REFRESH_TOKEN_KEY,
     tokenAge: process.env.ACCESS_TOKEN_AGE
+  },
+  rabbitMQ: {
+    server: process.env.RABBITMQ_SERVER
   }
 };
 
