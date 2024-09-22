@@ -2,6 +2,8 @@
 
 'use strict';
 
+const urls = require('./urls');
+
 const mapDBSongToModel = ({
   id,
   title,
@@ -18,6 +20,20 @@ const mapDBSongToModel = ({
   performer,
   duration,
   albumId: album_id
+});
+
+const mapDBAlbumToModel = ({
+  id,
+  name,
+  year,
+  cover
+}) => ({
+  id,
+  name,
+  year,
+  coverUrl: cover === null
+    ? null
+    : urls.getAlbumCover(cover)
 });
 
 const mapDBPlaylistToModel = ({ id, name, owner }) => ({
@@ -37,6 +53,7 @@ const mapOwnerIdToUsername = ({ ownerId, username }) => {
 
 module.exports = {
   mapDBSongToModel,
+  mapDBAlbumToModel,
   mapDBPlaylistToModel,
   mapOwnerIdToUsername
 };

@@ -2,6 +2,7 @@
 
 const { nanoid } = require('nanoid');
 const { Pool } = require('pg');
+const { mapDBAlbumToModel } = require('../../utils/index');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 
@@ -14,7 +15,7 @@ class AlbumsService {
     const id = `album-${nanoid(16)}`;
 
     const q = {
-      text: 'INSERT INTO albums VALUES($1, $2, $3) RETURNING id',
+      text: 'INSERT INTO albums (id, name, year) VALUES($1, $2, $3) RETURNING id',
       values: [id, name, year]
     };
 
@@ -39,6 +40,9 @@ class AlbumsService {
       throw new NotFoundError('Album not found');
     }
 
+    const mappedAlbum = resultAlbum.rows
+      .map(mapDBAlbumToModel);
+
     const q2 = {
       text: 'SELECT id, title, performer FROM songs WHERE album_id = $1',
       values: [id]
@@ -47,7 +51,7 @@ class AlbumsService {
     const resultSongs = await this._pool.query(q2);
 
     const album = {
-      ...resultAlbum.rows[0],
+      ...mappedAlbum[0],
       songs: resultSongs.rows
     };
 
@@ -71,6 +75,19 @@ class AlbumsService {
     const q = {
       text: 'DELETE FROM albums WHERE id = $1 RETURNING id',
       values: [id]
+    };
+
+    const result = await this._pool.query(q);
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Album not found');
+    }
+  }
+
+  async addCover(id, filename) {
+    const q = {
+      text: 'UPDATE albums SET cover = $2 WHERE id = $1 RETURNING id',
+      values: [id, filename]
     };
 
     const result = await this._pool.query(q);
