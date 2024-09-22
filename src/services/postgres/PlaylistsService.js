@@ -58,6 +58,10 @@ class PlaylistsService {
 
     const result = await this._pool.query(q);
 
+    if (!result.rows.length) {
+      throw new NotFoundError('Playlist not found');
+    }
+
     return result.rows
       .map(mapOwnerIdToUsername({ ownerId, username }))
       .map(mapDBPlaylistToModel)[0];
