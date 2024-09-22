@@ -3,9 +3,10 @@
 const autoBind = require('auto-bind');
 
 class AlbumsHandler {
-  constructor(albumsService, storageService, validator) {
+  constructor(albumsService, storageService, albumLikesService, validator) {
     this._albumsService = albumsService;
     this._storageService = storageService;
+    this._albumLikesService = albumLikesService;
     this._validator = validator;
 
     autoBind(this);
@@ -31,7 +32,10 @@ class AlbumsHandler {
   async getAlbumById(req, h) {
     const { id } = req.params;
 
-    const album = await this._albumsService.getById(id);
+    const _album = await this._albumsService.getById(id);
+    const songs = await this._albumsService.getSongs(id);
+
+    const album = { ..._album, songs };
 
     return h.response({
       status: 'success',
@@ -82,6 +86,47 @@ class AlbumsHandler {
     res.code(201);
 
     return res;
+  }
+
+  async postLike(req, h) {
+    const { id: albumId } = req.params;
+    const { id: userId } = req.auth.credentials;
+
+    await this._albumsService.getById(albumId);
+    await this._albumLikesService.like(userId, albumId);
+
+    const res = h.response({
+      status: 'success',
+      message: 'Album successfully liked'
+    });
+
+    res.code(201);
+
+    return res;
+  }
+
+  async deleteLike(req) {
+    const { id: albumId } = req.params;
+    const { id: userId } = req.auth.credentials;
+
+    await this._albumsService.getById(albumId);
+    await this._albumLikesService.dislike(userId, albumId);
+
+    return {
+      status: 'success',
+      message: 'Album successfully disliked'
+    };
+  }
+
+  async getLikes(req) {
+    const { id } = req.params;
+
+    const likes = await this._albumLikesService.countLikes(id);
+
+    return {
+      status: 'success',
+      data: { likes }
+    };
   }
 }
 

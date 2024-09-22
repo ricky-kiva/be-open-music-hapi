@@ -2,28 +2,28 @@
 
 const path = require('path');
 
-const albumPath = '/albums';
+const albumsPath = '/albums';
 
 const routes = (h) => [
   {
     method: 'POST',
-    path: albumPath,
+    path: albumsPath,
     handler: h.postAlbum
   }, {
     method: 'GET',
-    path: `${albumPath}/{id}`,
+    path: `${albumsPath}/{id}`,
     handler: h.getAlbumById
   }, {
     method: 'PUT',
-    path: `${albumPath}/{id}`,
+    path: `${albumsPath}/{id}`,
     handler: h.putAlbumById
   }, {
     method: 'DELETE',
-    path: `${albumPath}/{id}`,
+    path: `${albumsPath}/{id}`,
     handler: h.deleteAlbumById
   }, {
     method: 'POST',
-    path: `${albumPath}/{id}/covers`,
+    path: `${albumsPath}/{id}/covers`,
     handler: h.postAlbumCover,
     options: {
       payload: {
@@ -35,12 +35,26 @@ const routes = (h) => [
     }
   }, {
     method: 'GET',
-    path: `${albumPath}/covers/{param*}`,
+    path: `${albumsPath}/covers/{param*}`,
     handler: {
       directory: {
         path: path.resolve(__dirname, 'files', 'covers')
       }
     }
+  }, {
+    method: 'POST',
+    path: `${albumsPath}/{id}/likes`,
+    handler: h.postLike,
+    options: { auth: 'open_music_jwt' }
+  }, {
+    method: 'DELETE',
+    path: `${albumsPath}/{id}/likes`,
+    handler: h.deleteLike,
+    options: { auth: 'open_music_jwt' }
+  }, {
+    method: 'GET',
+    path: `${albumsPath}/{id}/likes`,
+    handler: h.getLikes
   }
 ];
 

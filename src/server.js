@@ -10,6 +10,7 @@ const config = require('./utils/config');
 const albums = require('./api/albums');
 const AlbumsService = require('./services/postgres/AlbumsService');
 const StorageService = require('./services/storage/StorageService');
+const AlbumLikesService = require('./services/postgres/AlbumLikesService');
 const AlbumsValidator = require('./validator/albums');
 const songs = require('./api/songs');
 const SongsService = require('./services/postgres/SongsService');
@@ -35,6 +36,7 @@ const init = async () => {
 
   const albumsService = new AlbumsService();
   const storageService = new StorageService(coverUploadPath);
+  const albumLikesService = new AlbumLikesService();
   const songsService = new SongsService();
   const usersService = new UsersService();
   const authsService = new AuthsService();
@@ -113,6 +115,7 @@ const init = async () => {
       options: {
         albumsService,
         storageService,
+        albumLikesService,
         validator: AlbumsValidator
       }
     }, {

@@ -34,28 +34,14 @@ class AlbumsService {
       values: [id]
     };
 
-    const resultAlbum = await this._pool.query(q1);
+    const albums = await this._pool.query(q1);
 
-    if (!resultAlbum.rows.length) {
+    if (!albums.rows.length) {
       throw new NotFoundError('Album not found');
     }
 
-    const mappedAlbum = resultAlbum.rows
-      .map(mapDBAlbumToModel);
-
-    const q2 = {
-      text: 'SELECT id, title, performer FROM songs WHERE album_id = $1',
-      values: [id]
-    };
-
-    const resultSongs = await this._pool.query(q2);
-
-    const album = {
-      ...mappedAlbum[0],
-      songs: resultSongs.rows
-    };
-
-    return album;
+    return albums.rows
+      .map(mapDBAlbumToModel)[0];
   }
 
   async editById(id, { name, year }) {
@@ -82,6 +68,17 @@ class AlbumsService {
     if (!result.rows.length) {
       throw new NotFoundError('Album not found');
     }
+  }
+
+  async getSongs(id) {
+    const q = {
+      text: 'SELECT id, title, performer FROM songs WHERE album_id = $1',
+      values: [id]
+    };
+
+    const result = await this._pool.query(q);
+
+    return result.rows;
   }
 
   async addCover(id, filename) {
