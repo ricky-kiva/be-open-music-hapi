@@ -3,8 +3,9 @@
 const autoBind = require('auto-bind');
 
 class AlbumsHandler {
-  constructor(service, validator) {
-    this._service = service;
+  constructor(albumsService, storageService, validator) {
+    this._albumsService = albumsService;
+    this._storageService = storageService;
     this._validator = validator;
 
     autoBind(this);
@@ -15,7 +16,7 @@ class AlbumsHandler {
 
     const { name, year } = req.payload;
 
-    const albumId = await this._service.add({ name, year });
+    const albumId = await this._albumsService.add({ name, year });
 
     const res = h.response({
       status: 'success',
@@ -30,7 +31,7 @@ class AlbumsHandler {
   async getAlbumById(req, h) {
     const { id } = req.params;
 
-    const album = await this._service.getById(id);
+    const album = await this._albumsService.getById(id);
 
     return h.response({
       status: 'success',
@@ -43,7 +44,7 @@ class AlbumsHandler {
 
     const { id } = req.params;
 
-    await this._service.editById(id, req.payload);
+    await this._albumsService.editById(id, req.payload);
 
     return {
       status: 'success',
@@ -54,12 +55,31 @@ class AlbumsHandler {
   async deleteAlbumById(req) {
     const { id } = req.params;
 
-    await this._service.deleteById(id);
+    await this._albumsService.deleteById(id);
 
     return {
       status: 'success',
       message: 'Album successfully deleted'
     };
+  }
+
+  async postAlbumCover(req, h) {
+    const { cover } = req.payload;
+
+    this._validator.validateCoverHeaders(cover.hapi.headers);
+
+    await this._storageService.writeFile(cover, cover.hapi);
+
+    // TODO save to DB
+
+    const res = h.response({
+      status: 'success',
+      message: 'Cover successfully uploaded'
+    });
+
+    res.code(201);
+
+    return res;
   }
 }
 
