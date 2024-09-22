@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
+const Inert = require('@hapi/inert');
 const path = require('path');
 const config = require('./utils/config');
 const albums = require('./api/albums');
@@ -30,7 +31,7 @@ const ExportsValidator = require('./validator/exports');
 const ClientError = require('./exceptions/ClientError');
 
 const init = async () => {
-  const coverUploadPath = path.resolve(__dirname, 'api/albums/covers');
+  const coverUploadPath = path.resolve(__dirname, 'api/albums/files/covers');
 
   const albumsService = new AlbumsService();
   const storageService = new StorageService(coverUploadPath);
@@ -85,7 +86,10 @@ const init = async () => {
     return h.continue;
   });
 
-  await server.register({ plugin: Jwt });
+  await server.register([
+    { plugin: Jwt },
+    { plugin: Inert }
+  ]);
 
   server.auth.strategy('open_music_jwt', 'jwt', {
     keys: config.jwt.accessToken,
