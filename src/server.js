@@ -4,9 +4,11 @@ require('dotenv').config();
 
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
+const path = require('path');
 const config = require('./utils/config');
 const albums = require('./api/albums');
 const AlbumsService = require('./services/postgres/AlbumsService');
+const StorageService = require('./services/storage/StorageService');
 const AlbumsValidator = require('./validator/albums');
 const songs = require('./api/songs');
 const SongsService = require('./services/postgres/SongsService');
@@ -28,7 +30,10 @@ const ExportsValidator = require('./validator/exports');
 const ClientError = require('./exceptions/ClientError');
 
 const init = async () => {
+  const coverUploadPath = path.resolve(__dirname, 'api/albums/cover');
+
   const albumsService = new AlbumsService();
+  const storageService = new StorageService(coverUploadPath);
   const songsService = new SongsService();
   const usersService = new UsersService();
   const authsService = new AuthsService();
@@ -102,7 +107,8 @@ const init = async () => {
     {
       plugin: albums,
       options: {
-        service: albumsService,
+        albumsService,
+        storageService,
         validator: AlbumsValidator
       }
     }, {
